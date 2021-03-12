@@ -23,7 +23,7 @@ sudo apt install \
 git clone https://github.com/4nd3r/requests-logger
 cd requests-logger
 
-sudo pip3 install -r requirments.txt
+sudo pip3 install -r requirements.txt
 ./requests_logger.py github.com
 find dumps/
 ```
