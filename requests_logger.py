@@ -68,12 +68,18 @@ class RequestsLogger:
         try:
             self._driver.get(url)
         except selenium.common.exceptions.TimeoutException:
-            if len(self._driver.requests) == 0:
+            try:
+                if len(self._driver.requests) == 0:
+                    return False
+            except Exception:
                 return False
             self.log_message('some requests may be missing')
         except Exception:
             return False
-        return self._driver.requests
+        try:
+            return self._driver.requests
+        except Exception:
+            return False
 
     def _get_host(self, url):
         return urllib.parse.urlparse(url).netloc
