@@ -94,6 +94,8 @@ class RequestsLogger:
         self.log_message('dividing requests')
         for request in requests:
             url = request.url
+            if url.rstrip('/') == self.results['url']:
+                continue
             host = self._get_host(url)
             domain = self._get_domain(host)
             if not host or not domain:
@@ -109,7 +111,8 @@ class RequestsLogger:
             if url in self.results[urls_result_key]:
                 continue
             self.results[urls_result_key].append(url)
-            if host in self.results[hosts_result_key]:
+            if host in self.results[hosts_result_key] \
+                    or host == f'www.{domain}':
                 continue
             self.results[hosts_result_key].append(host)
             if domains_result_key:
