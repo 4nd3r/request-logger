@@ -19,7 +19,7 @@ class RequestsLogger:
     def __init__(self):
         self.id = None
         self.messages = []
-        self.results = {
+        self.result = {
             'url': '',
             'host': '',
             'domain': '',
@@ -94,13 +94,13 @@ class RequestsLogger:
         self.log_message('dividing requests')
         for request in requests:
             url = request.url
-            if url.rstrip('/') == self.results['url']:
+            if url.rstrip('/') == self.result['url']:
                 continue
             host = self._get_host(url)
             domain = self._get_domain(host)
             if not host or not domain:
                 continue
-            if self.results['domain'] == domain:
+            if self.result['domain'] == domain:
                 urls_result_key = 'first_party_urls'
                 hosts_result_key = 'first_party_hosts'
                 domains_result_key = None
@@ -108,64 +108,64 @@ class RequestsLogger:
                 urls_result_key = 'third_party_urls'
                 hosts_result_key = 'third_party_hosts'
                 domains_result_key = 'third_party_domains'
-            if url in self.results[urls_result_key]:
+            if url in self.result[urls_result_key]:
                 continue
-            self.results[urls_result_key].append(url)
-            if host in self.results[hosts_result_key] \
+            self.result[urls_result_key].append(url)
+            if host in self.result[hosts_result_key] \
                     or host == f'www.{domain}':
                 continue
-            self.results[hosts_result_key].append(host)
+            self.result[hosts_result_key].append(host)
             if domains_result_key:
-                if domain in self.results[domains_result_key]:
+                if domain in self.result[domains_result_key]:
                     continue
-                self.results[domains_result_key].append(domain)
+                self.result[domains_result_key].append(domain)
 
     def log_requests(self, url):
         if not url.startswith('http://') and not url.startswith('https://'):
             url = f'http://{url}'
         self.log_message(f'logging requests from {url}')
-        self.results['url'] = url
-        self.results['host'] = self._get_host(self.results['url'])
-        self.results['domain'] = self._get_domain(self.results['host'])
-        if not self.results['host'] or not self.results['domain']:
+        self.result['url'] = url
+        self.result['host'] = self._get_host(self.result['url'])
+        self.result['domain'] = self._get_domain(self.result['host'])
+        if not self.result['host'] or not self.result['domain']:
             self.log_message('unable to parse host or domain')
             return False
         try:
             self.log_message('liveness check')
             urllib.request.urlopen(
                 urllib.request.Request(
-                    self.results['url'],
+                    self.result['url'],
                     headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36'}),
                     timeout=10)
         except Exception:
             self.log_message('site seems to be down or broken')
             return False
         self.log_message('start logging requests')
-        requests = self._get_requests(self.results['url'])
+        requests = self._get_requests(self.result['url'])
         if not requests:
             self.log_message('no requests logged')
             return False
         self.log_message('{} requests'.format(len(requests)))
         self._divide_requests(requests)
-        if not self.results['first_party_urls'] and not self.results['third_party_urls']:
+        if not self.result['first_party_urls'] and not self.result['third_party_urls']:
             self.log_message('no requests left after division')
             return False
-        for key in self.results:
-            if isinstance(self.results[key], list):
-                self.log_message('{} {}'.format(len(self.results[key]), key))
-                self.results[key].sort()
+        for key in self.result:
+            if isinstance(self.result[key], list):
+                self.log_message('{} {}'.format(len(self.result[key]), key))
+                self.result[key].sort()
         self.log_message('logging requests successful')
         return True
 
     def dump(self, dump_dir):
         os.makedirs(dump_dir, exist_ok=True)
-        self.results['messages'] = self.messages.copy()
+        self.result['messages'] = self.messages.copy()
         self.log_message(f'dumping to {dump_dir}')
-        for key in self.results:
-            if not self.results[key]:
+        for key in self.result:
+            if not self.result[key]:
                 continue
             handle = open(os.path.join(dump_dir, key), 'w')
-            content = self.results[key]
+            content = self.result[key]
             if isinstance(content, list):
                 for line in content:
                     handle.write(f'{line}\n')
