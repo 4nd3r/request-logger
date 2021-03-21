@@ -25,7 +25,6 @@ class RequestsLogger:
             'domain': '',
             'first_party_urls': [],
             'first_party_hosts': [],
-            'first_party_domains': [],
             'third_party_urls': [],
             'third_party_hosts': [],
             'third_party_domains': []}
@@ -102,7 +101,7 @@ class RequestsLogger:
             if self.results['domain'] == domain:
                 urls_result_key = 'first_party_urls'
                 hosts_result_key = 'first_party_hosts'
-                domains_result_key = 'first_party_domains'
+                domains_result_key = None
             else:
                 urls_result_key = 'third_party_urls'
                 hosts_result_key = 'third_party_hosts'
@@ -113,9 +112,10 @@ class RequestsLogger:
             if host in self.results[hosts_result_key]:
                 continue
             self.results[hosts_result_key].append(host)
-            if domain in self.results[domains_result_key]:
-                continue
-            self.results[domains_result_key].append(domain)
+            if domains_result_key:
+                if domain in self.results[domains_result_key]:
+                    continue
+                self.results[domains_result_key].append(domain)
 
     def log_requests(self, url):
         if not url.startswith('http://') and not url.startswith('https://'):
