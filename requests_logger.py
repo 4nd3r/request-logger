@@ -177,7 +177,7 @@ class RequestsLogger:
     def log_requests_and_dump(self, url, dump_dir=None):
         if dump_dir is None:
             if self.id is None:
-                self.id = hashlib.md5(url.encode('utf-8')).hexdigest()[0:15]
+                self.id = hashlib.md5(url.encode()).hexdigest()[0:15]
             dump_dir = f'dumps/{self.id[0]}/{self.id[1]}/{self.id}'
         if os.path.isdir(dump_dir) and os.path.isfile(os.path.join(dump_dir, 'messages')):
             self.log_message(f'already dumped to {dump_dir}')
