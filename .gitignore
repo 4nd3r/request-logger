@@ -1,6 +1,6 @@
 *.tar.*
 __pycache__
-dumps
+dumps*
 hosts
 stop
 tools
