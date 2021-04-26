@@ -1,6 +1,4 @@
-*.tar.*
+.venv
 __pycache__
 dumps*
-hosts
 stop
-tools
