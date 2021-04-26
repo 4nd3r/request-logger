@@ -174,11 +174,13 @@ class RequestsLogger:
             handle.close()
         return True
 
-    def log_requests_and_dump(self, url, dump_dir=None):
+    def log_requests_and_dump(self, url, dump_dir=None, dumps_dir=None):
+        if dumps_dir is None:
+            dumps_dir = 'dumps'
         if dump_dir is None:
             if self.id is None:
-                self.id = hashlib.md5(url.encode()).hexdigest()[0:15]
-            dump_dir = f'dumps/{self.id[0]}/{self.id[1]}/{self.id}'
+                self.id = hashlib.md5(url.encode()).hexdigest()
+            dump_dir = f'{dumps_dir}/{self.id[0]}/{self.id[1]}/{self.id}'
         if os.path.isdir(dump_dir) and os.path.isfile(os.path.join(dump_dir, 'messages')):
             self.log_message(f'already dumped to {dump_dir}')
             return False
@@ -189,6 +191,8 @@ class RequestsLogger:
 
 if __name__ == '__main__':
     cli = argparse.ArgumentParser()
+    cli.add_argument('-d', metavar='PATH', help='dump dir', dest='dump_dir', default=None)
+    cli.add_argument('-D', metavar='PATH', help='dumps dir', dest='dumps_dir', default=None)
     cli.add_argument('input', help='URL or FILE with URLs')
     args = cli.parse_args()
     if os.path.isfile(args.input):
@@ -205,7 +209,7 @@ if __name__ == '__main__':
             break
         url = url.strip()
         try:
-            RL.log_requests_and_dump(url)
+            RL.log_requests_and_dump(url, args.dump_dir, args.dumps_dir)
             RL.reset()
         except Exception:
             traceback.print_exc()
